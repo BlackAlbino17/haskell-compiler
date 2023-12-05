@@ -12,6 +12,8 @@ type State = [StateElement]
 
 emptyState :: State
 emptyState = []
+
+
 {-
 , lookupVar, updateVar
 -- Function to create an empty state

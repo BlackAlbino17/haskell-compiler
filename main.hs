@@ -24,7 +24,8 @@ stack2Str = undefined -- TODO, Uncomment all the other function type declaration
 
 
 -- createEmptyState :: State
-createEmptyState = undefined -- TODO, Uncomment the function signature after defining State
+createEmptyState :: State StateElement -- TODO, Uncomment the function signature after defining State
+createEmptyState = State.emptyState
 
 -- state2Str :: State -> String
 state2Str = undefined -- TODO
