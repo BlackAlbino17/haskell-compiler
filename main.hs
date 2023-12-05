@@ -9,7 +9,14 @@ data Inst =
   deriving Show
 type Code = [Inst]
 
-createEmptyStack :: Stack a 
+
+-- Define a type for elements that can be either Integer or BoolConst
+data StackElement = StackInt Integer | StackBool BoolConst deriving Show
+
+data BoolConst = TT | FF deriving (Show)
+
+-- Function to create an empty stack
+createEmptyStack :: Stack StackElement
 createEmptyStack = Stack.empty
 
 -- stack2Str :: Stack a  -> String
