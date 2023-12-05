@@ -1,5 +1,6 @@
 -- PFL 2023/24 - Haskell practical assignment quickstart
 import Stack 
+import State
 -- Part 1
 
 -- Do not modify our definition of Inst and Code
@@ -12,7 +13,6 @@ type Code = [Inst]
 
 -- Define a type for elements that can be either Integer or BoolConst
 data StackElement = StackInt Integer | StackBool BoolConst deriving Show
-
 data BoolConst = TT | FF deriving (Show)
 
 -- Function to create an empty stack
@@ -21,6 +21,7 @@ createEmptyStack = Stack.empty
 
 -- stack2Str :: Stack a  -> String
 stack2Str = undefined -- TODO, Uncomment all the other function type declarations as you implement them
+
 
 -- createEmptyState :: State
 createEmptyState = undefined -- TODO, Uncomment the function signature after defining State
