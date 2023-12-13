@@ -1,7 +1,7 @@
 module Main where
 
 import Container
-import Evaluator
+import Interpreter
 --import Parser
 import Tests( runAllAssemblerTests)
 

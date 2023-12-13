@@ -1,7 +1,7 @@
 module Tests where
 
 import Container
-import Evaluator
+import Interpreter
 
 testAssembler :: Code -> (String, String)
 testAssembler code = (stack2Str stack, state2Str state)

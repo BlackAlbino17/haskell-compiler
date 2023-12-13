@@ -1,7 +1,7 @@
 -- Import necessary modules
 module Container where
 
-import qualified Data.Map.Strict as HashMap
+import qualified Data.Map.Strict as MyMap
 import Data.List (intercalate, sort)
 import Data.Map (toList)
 
@@ -48,7 +48,7 @@ stack2Str stk = intercalate "," (map stackValueToString stk)
 type Key = String
 type Value = StackValue
 
-type State = HashMap.Map Key Value
+type State = MyMap.Map Key Value
 
 -- Function to convert a key-value pair to a string
 tupleToString :: (String, StackValue) -> String
@@ -58,11 +58,11 @@ tupleToString (key, FF) = key ++ "=False"
 
 -- Create an empty state
 createEmptyState :: State
-createEmptyState = HashMap.empty
+createEmptyState = MyMap.empty
 
 -- Insert a key-value pair into the state
 insertIntoState :: Key -> Value -> State -> State
-insertIntoState k v state = HashMap.insert k v state
+insertIntoState k v state = MyMap.insert k v state
 
 -- Convert a state to a string
 state2Str :: State -> String
