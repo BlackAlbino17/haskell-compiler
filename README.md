@@ -17,21 +17,21 @@
 
 ### Data Structures
 
-- We decided to use a modular approach by separating the data structures, Evaluator, and compiler into distinct modules (`container.hs`, `evaluator.hs`, `parser.hs`).
+- We decided to use a modular approach by separating the data structures, Interpreter, and compiler into distinct modules (`container.hs`, `Interpreter.hs`, `parser.hs`).
 - The `Container` module defines the instructions, stack, and state types.
-- The `Evaluator` module contains functions to interpret instructions, manipulate the stack and state, and run the code.
-- The `Tests` module provides a set of tests for the Evaluator.
+- The `Interpreter` module contains functions to interpret instructions, manipulate the stack and state, and run the code.
+- The `Tests` module provides a set of tests for the Interpreter.
 - The `Parser` module is currently a placeholder for future development.
 
-### Evaluator
+### Interpreter
 
-- The Evaluator (`Evaluator.hs`) provides functions for each instruction type, such as arithmetic and logical operations, stack manipulation, and state manipulation.
+- The Interpreter (`Interpreter.hs`) provides functions for each instruction type, such as arithmetic and logical operations, stack manipulation, and state manipulation.
 - We followed a pattern of using pattern matching to handle different cases for instructions.
 - The `run` function recursively processes instructions until the code is empty.
 
 ### Tests
 
-- The `Tests` module includes a set of tests for the Evaluator (`runAllAssemblerTests`).
+- The `Tests` module includes a set of tests for the Interpreter (`runAllAssemblerTests`).
 - Tests cover various scenarios, including arithmetic operations, logical operations, stack manipulation, and state manipulation.
 
 ### Parser (Placeholder)
