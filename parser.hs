@@ -32,6 +32,9 @@ operator = Token.operator lexer
 semiSep :: Parser a -> Parser [a]
 semiSep = Token.semiSep lexer
 
+lexeme :: Parser a -> Parser a
+lexeme p = p <* Token.whiteSpace lexer
+
 -- Part 2
 -- TODO: Define the types Aexp, Bexp, Stm and Program
 
@@ -125,8 +128,7 @@ assignParser = do
 
 seqParser :: Parser Stm
 seqParser = do
-  stmts <- semiSep stmParser
-  optional (reserved ";") 
+  stmts <- stmParser `sepEndBy1` reserved ";"
   return $ foldr1 Seq stmts
 
 ifThenElseParser :: Parser Stm
