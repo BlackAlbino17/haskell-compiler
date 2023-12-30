@@ -1,6 +1,7 @@
 module Tests where
-
 import Container
+import Parser
+
 import Interpreter
 
 testAssembler :: Code -> (String, String)
@@ -21,9 +22,9 @@ runAllAssemblerTests = do
 
 
 -- To help you test your parser
---testParser :: String -> (String, String)
---testParser programCode = (stack2Str stack, state2Str state)
---  where (_,stack,state) = run(compile (parse programCode), createEmptyStack, createEmptyState)
+testParser :: String -> (String, String)
+testParser programCode = (stack2Str stack, state2Str state)
+  where (_, stack, state) = run (compile (parse programCode), createEmptyStack, createEmptyState)
 
 
 --runAllParserTests :: IO ()
