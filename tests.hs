@@ -26,7 +26,7 @@ testParser :: String -> (String, String)
 testParser programCode = (stack2Str stack, state2Str state)
   where (_, stack, state) = run (compile (parse programCode), createEmptyStack, createEmptyState)
 
-
+  
 --runAllParserTests :: IO ()
 --runAllParserTests = do
 --  print $ testParser "x := 5; x := x - 1;" == ("","x=4")
