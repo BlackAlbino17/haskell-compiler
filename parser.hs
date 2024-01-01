@@ -47,6 +47,7 @@ compA (SUB e1 e2) = compA e2 ++ compA e1 ++ [Sub]
 compA (MULT e1 e2) = compA e2 ++ compA e1 ++ [Mult]
 
 
+
 compB :: Bexp -> Code
 compB TRUE      = [Tru]
 compB FALSE     = [Fals]
@@ -92,7 +93,7 @@ lexer = reverse . go []
 getValue :: Num a => Maybe a -> a
 getValue (Just a) = a+1
 getValue Nothing = error "Throw error getValue(Value not found)"
--- verified
+-- verified 
 
 parse :: String -> Program
 parse str = parsing(lexer str) []
@@ -126,22 +127,25 @@ parsing ("(":rest) statement =
 -- verified
 
 parsing ("if":rest) statm =
-    let thenElement = getValue (elemIndex "then" ("if":rest))
-        elseElement = getValue (elemIndex "else" ("if":rest))
-        missingPart = drop elseElement ("if":rest)
-        condition = parseAnd (isPar (drop 1 (take (thenElement - 1) ("if":rest))))
-        thenBranch = parsing (drop thenElement (take (elseElement - 1) ("if":rest))) []
-        elseBranch = case firstElemTake missingPart of
-                       "(" -> parsing (drop (getValue (elemIndex ")" missingPart)) missingPart) []
-                       _   -> parsing (drop (getValue (elemIndex ";" missingPart)) missingPart) []
-    in parsing (drop (getValue (elemIndex ")" missingPart)) missingPart) (statm ++ [IfThenElse (getValueBexp condition) thenBranch elseBranch])
+    let thenValue = getValue (elemIndex "then" ("if":rest))
+        elseValue = getValue (elemIndex "else" ("if":rest))
+        afterValues = drop elseValue ("if":rest)
+        cond = parseAnd (isPar (drop 1 (take (thenValue - 1) ("if":rest))))
+        thenCase = parsing (drop thenValue (take (elseValue - 1) ("if":rest))) []
+        elseCase =
+            case firstElemTake afterValues of
+                "(" -> parsing (drop (getValue (elemIndex ")" afterValues)) afterValues) []
+                ";" -> parsing (drop (getValue (elemIndex ";" afterValues)) afterValues) []
+                _   -> parsing afterValues [] 
+    in parsing (drop (getValue (elemIndex ")" afterValues)) afterValues) (statm ++ [IfThenElse (getValueBexp cond) thenCase elseCase])
 
-parsing ("while":rest) stm = let dopos = (getValue (elemIndex "do" ("while":rest)))
-                                 arrayafter = (drop (dopos) ("while":rest))
-                              in case firstElemTake arrayafter of
-                                "(" -> parsing (drop (getValue (elemIndex ")" arrayafter)) arrayafter) (stm++[While (getValueBexp ((parseAnd (isPar (drop 1 (take (dopos-1) ("while":rest))))))) (parsing (take (getValue (elemIndex ")" arrayafter)) arrayafter ) [] )])
-                                _ -> parsing (drop (getValue (elemIndex ";" arrayafter)) arrayafter) (stm++[While (getValueBexp ((parseAnd (isPar (drop 1 (take (dopos-1) ("while":rest))))))) (parsing (take (getValue (elemIndex ";" arrayafter)) arrayafter ) [] )])
-
+parsing ("while":rest) stm =
+  let doElem = getValue $ elemIndex "do" ("while":rest)
+      after = drop doElem ("while":rest)
+      condition = getValueBexp $ parseAnd $ isPar $ drop 1 $ take (doElem-1) ("while":rest)
+  in case firstElemTake after of
+       "(" -> parsing (drop (getValue $ elemIndex ")" after) after) (stm ++ [While condition (parsing (take (getValue $ elemIndex ")" after) after) [])])
+       _   -> parsing (drop (getValue $ elemIndex ";" after) after) (stm ++ [While condition (parsing (take (getValue $ elemIndex ";" after) after) [])])
 
 
 firstElemTake :: [String] -> String
