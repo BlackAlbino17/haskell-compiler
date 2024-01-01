@@ -60,10 +60,13 @@ compB (EqBool e1 e2) = compB e2 ++ compB e1 ++ [Equ]
 
 compile :: Program -> Code
 compile [] = []
-compile ((Assign x a):statms) = compA a ++ [Store x] ++ compile statms
-compile ((IfThenElse b statm1 statm2):statms) = compB b ++ [Branch (compile statm1) (compile statm2)] ++ compile statms
-compile ((While b statm):statms) = [Loop (compB b) (compile statm)] ++ compile statms
-
+compile (stmt:rest) = case stmt of
+  Assign var expr -> compA expr ++ [Store var] ++ compile rest
+  Seq stmt1 stmt2 -> compile [stmt1] ++ compile [stmt2] ++ compile rest
+  IfThenElse cond thenStmt elseStmt ->
+    compB cond ++ [Branch (compile thenStmt) (compile elseStmt)] ++ compile rest
+  While cond body ->
+    [Branch (compB cond ++ [Branch (compile body ++ [Branch (compile [While cond body]) [Noop]]) [Noop]]) [Noop]] ++ compile rest
 
 
 -- parse :: String -> Program
@@ -122,12 +125,17 @@ parsing ("(":rest) statement =
   in parsing afterParen (statement ++ (parsing insidePar []))
 -- verified
 
-parsing ("if":rest) stm = let thenpos = (getValue (elemIndex "then" ("if":rest)))
-                              elsepos = (getValue (elemIndex "else" ("if":rest)))
-                              arrayafter = (drop (elsepos) ("if":rest))
-                            in case firstElemTake arrayafter of
-                              "(" -> parsing (drop (getValue (elemIndex ")" arrayafter)) arrayafter) (stm++[IfThenElse (getValueBexp ((parseAnd (isPar (drop 1 (take (thenpos-1) ("if":rest))))))) (parsing (drop thenpos (take (elsepos-1) ("if":rest))) []) (parsing (take (getValue (elemIndex ")" arrayafter)) arrayafter ) [] )])
-                              _  -> parsing (drop (getValue (elemIndex ";" arrayafter)) arrayafter) (stm++[IfThenElse (getValueBexp ((parseAnd (isPar (drop 1 (take (thenpos-1) ("if":rest))))))) (parsing (drop thenpos (take (elsepos-1) ("if":rest))) []) (parsing (take (getValue (elemIndex ";" arrayafter)) arrayafter ) [] )])
+parsing ("if":rest) statm =
+    let thenElement = getValue (elemIndex "then" ("if":rest))
+        elseElement = getValue (elemIndex "else" ("if":rest))
+        missingPart = drop elseElement ("if":rest)
+        condition = parseAnd (isPar (drop 1 (take (thenElement - 1) ("if":rest))))
+        thenBranch = parsing (drop thenElement (take (elseElement - 1) ("if":rest))) []
+        elseBranch = case firstElemTake missingPart of
+                       "(" -> parsing (drop (getValue (elemIndex ")" missingPart)) missingPart) []
+                       _   -> parsing (drop (getValue (elemIndex ";" missingPart)) missingPart) []
+    in parsing (drop (getValue (elemIndex ")" missingPart)) missingPart) (statm ++ [IfThenElse (getValueBexp condition) thenBranch elseBranch])
+
 parsing ("while":rest) stm = let dopos = (getValue (elemIndex "do" ("while":rest)))
                                  arrayafter = (drop (dopos) ("while":rest))
                               in case firstElemTake arrayafter of
