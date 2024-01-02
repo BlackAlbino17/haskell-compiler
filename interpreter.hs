@@ -12,7 +12,7 @@ add stack
     value2 == Nothing = stack
   | Just (Number n1) <- value1,
     Just (Number n2) <- value2 = pushToStack (Number (n1 + n2)) popStack2
-  | otherwise = stack
+  | otherwise = error "Run-time error"
   where
     (value1, popStack1) = pop stack
     (value2, popStack2) = pop popStack1
@@ -26,7 +26,7 @@ mult stack
     value2 == Nothing = stack
   | Just (Number n1) <- value1,
     Just (Number n2) <- value2 = pushToStack (Number (n1 * n2)) popStack2
-  | otherwise = stack
+  | otherwise = error "Run-time error"
   where
     (value1, popStack1) = pop stack
     (value2, popStack2) = pop popStack1
@@ -40,7 +40,7 @@ sub stack
     value2 == Nothing = stack
   | Just (Number n1) <- value1,
     Just (Number n2) <- value2 = pushToStack (Number (n1 - n2)) popStack2
-  | otherwise = stack
+  | otherwise = error "Run-time error"
   where
     (value1, popStack1) = pop stack
     (value2, popStack2) = pop popStack1
@@ -62,7 +62,7 @@ eq stack
     Just FF <- value2 = pushToStack TT popStack2
   | Just FF <- value1,
     Just TT <- value2 = pushToStack FF popStack2
-  | otherwise = stack
+  | otherwise = error "Run-time error"
   where
     (value1, popStack1) = pop stack
     (value2, popStack2) = pop popStack1
@@ -78,7 +78,7 @@ le stack
     Just (Number n2) <- value2 =
       let value = if n1 <= n2 then TT else FF
       in pushToStack value popStack2
-  | otherwise = stack
+  | otherwise = error "Run-time error"
   where
     (value1, popStack1) = pop stack
     (value2, popStack2) = pop popStack1
@@ -95,7 +95,7 @@ and stack
   | Just TT <- value1,
     Just FF <- value2 = pushToStack FF popStack2
   | Just FF <- value1 = pushToStack FF popStack2
-  | otherwise = stack
+  | otherwise = error "Run-time error"
   where
     (value1, popStack1) = pop stack
     (value2, popStack2) = pop popStack1
@@ -107,7 +107,7 @@ neg stack
   | value1 == Nothing = stack
   | Just TT <- value1 = pushToStack FF popStack1
   | Just FF <- value1 = pushToStack TT popStack1
-  | otherwise = stack
+  | otherwise = error "Run-time error"
   where
     (value1, popStack1) = pop stack
 
@@ -123,7 +123,7 @@ push (Left n)      = pushToStack (Number n)
 fetch :: Key -> Stack -> State -> Stack
 fetch key stack state
   | Just value <- MyMap.lookup key state = pushToStack value stack
-  | otherwise = stack
+  | otherwise = error "Run-time error"
 
 -- Receives a Key, the stack and the state and returns the updated stack and state
 store :: Key -> Stack -> State -> (Stack, State)
@@ -137,10 +137,13 @@ store key stack state
 -- Receives 2 code flows and the stack and returns one of the code flows and the updated stack
 branch :: Code -> Code -> Stack -> (Code, Stack)
 branch c1 c2 stack
-  | Just value <- val = (if value == TT then c1 else c2, stackAfterPop)
-  | otherwise = (c1, stackAfterPop)
+  | Just value <- val = case value of
+      TT -> (c1, stackAfterPop)
+      FF -> (c2, stackAfterPop)
+  | otherwise = error "Run-time error"
   where
     (val, stackAfterPop) = pop stack
+
 
 -- Receives 2 code flows, the stack and the state and returns the remaining code flow, the updated stack and updated state
 loop :: Code -> Code -> Code
