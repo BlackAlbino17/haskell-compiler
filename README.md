@@ -130,8 +130,62 @@ This IO action runs a series of tests using `testAssembler` and prints the resul
 
 # Parser (Placeholder)
 
-- The `Parser` module is currently incomplete and serves as a placeholder for future development.
-- It includes commented-out code for defining types (`Aexp`, `Bexp`, `Stm`, and `Program`) and compiler functions (`compA`, `compB`, `compile`, `parse`).
+- The `Parser` module is currently incomplete in a way that it doesnt meet the criteria for the parser tests on the while and if statements.
+- This was do to problems we had building the functions regarding those statements and some debug issues we had on which we couldnt unfortunetely
+ complete this functions with success. The tests that dont pass are commented on tests.hs
+
+- Regarding the parser.hs file we started by defining data and types that we thought would be used on this second stage of the project 
+
+```hs
+data Aexp = ADD Aexp Aexp
+          | SUB Aexp Aexp
+          | MULT Aexp Aexp
+          | Num Integer
+          | Var String
+          deriving (Eq, Show)
+-- verified
+data Bexp = TRUE
+          | FALSE
+          | NOT Bexp
+          | AND Bexp Bexp
+          | LEQ Aexp Aexp
+          | Eq Aexp Aexp -- expressoes com =
+          | EqBool Bexp Bexp -- expressoes com ==
+          deriving (Eq, Show)
+-- verified
+
+data Stm = Assign String Aexp
+         | Seq Stm Stm
+         | IfThenElse Bexp [Stm] [Stm]
+         | While Bexp [Stm]
+         deriving (Eq, Show)
+
+-- verified
+type Program = [Stm]
+```
+
+We then proceded to implement the compiler that would be responsible for receiving an argument and return the Code (list with program instructions).
+We created compilers for both arithmetic expressions and boolean expressions, 'compA' and 'compB' respectively
+```hs
+compile :: Program -> Code
+compile [] = []
+compile (stmt:rest) = case stmt of
+  Assign var expr -> compA expr ++ [Store var] ++ compile rest
+  Seq stmt1 stmt2 -> compile [stmt1] ++ compile [stmt2] ++ compile rest
+  IfThenElse cond thenStmt elseStmt ->
+    compB cond ++ [Branch (compile thenStmt) (compile elseStmt)] ++ compile rest
+  While cond body ->
+    [Branch (compB cond ++ [Branch (compile body ++ [Branch (compile [While cond body]) [Noop]]) [Noop]]) [Noop]] ++ compile rest
+
+```
+This is what the main compile function looks like! It processes each statement in the program based on its type.
+For the assign case we compute the expression value and store it in the corresponding variable; for sequence statements we went to recursion to compile each sub-statement and concatenate the result; On the If Else case we generate code to evaluate the condition and branch accordingly; For the while statements we do a loop structure using conditional branches and no operation instructions.
+
+
+Regarding the parser itself we tried to follow the requirements of the project on its definition. We used lexer as instructed on the theoretical classes to help us separate the content of the instructions and store it on a list of strings.
+We also implemented several parsing expressions based on the theoretical slides that helped us parse the different arithmetic and boolean expressions.
+
+To help the parser function we created a parsing function to aid passing the string list to lexer. Once it receives the list it will iterate throught it while trying to match each case of the parsing regarding parenthesis, if and else statements, while statements and assignment statements. (If and else statements are not working as expected).
 
 # How to Run
 
