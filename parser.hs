@@ -1,6 +1,6 @@
 module Parser where 
 import Container 
-import Data.Char (isSpace, isDigit)
+import Data.Char (isSpace, isDigit, isAlpha, isAlphaNum)
 import Data.List (elemIndex)
 import Text.Read (readMaybe)
 
@@ -85,6 +85,8 @@ lexer = reverse . go []
       | isSpace c = go acc cs
       | isDigit c = let (token, rest) = span isDigit (c:cs)
                     in go (token : acc) rest
+      | isAlpha c = let (token, rest) = span isAlphaNum (c:cs)
+                    in go (token : acc) rest
       | c `elem` "();+" = go ([c] : acc) cs
       | c == '*'   = go ("*" : acc) cs
       | otherwise = let (token, rest) = span (\x -> not (isSpace x || isDigit x || x `elem` "();+*")) (c:cs)
@@ -107,7 +109,7 @@ parsing [] stm = stm -- default
 --parsing dos assigns
 parsing (a:":=":rest) stm = let x = getValue (elemIndex ";" (a:":=":rest))
                               in case parseSumOrProdOrIntOrPar (drop 2 (take (x-1) (a:":=":rest))) of
-                                Just (expr,[]) -> parsing (drop x (a:":=":rest)) (stm ++ [(Assign a (expr))])
+                                Just (expr,[]) -> parsing (drop x (a:":=":rest)) (stm ++ [(Assign a expr)])
                                 Nothing -> error "Parse Error"
                                 _ -> error "Parse Error"
 
