@@ -137,10 +137,8 @@ store key stack state
 -- Receives 2 code flows and the stack and returns one of the code flows and the updated stack
 branch :: Code -> Code -> Stack -> (Code, Stack)
 branch c1 c2 stack
-  | Just value <- val = case value of
-      TT -> (c1, stackAfterPop)
-      FF -> (c2, stackAfterPop)
-  | otherwise = error "Run-time error"
+  | Just value <- val = (if value == TT then c1 else c2, stackAfterPop)
+  | otherwise = (c1, stackAfterPop)
   where
     (val, stackAfterPop) = pop stack
 

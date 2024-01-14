@@ -129,17 +129,12 @@ parsing ("(":rest) statement =
 -- verified
 
 parsing ("if":rest) statm =
-    let thenValue = getValue (elemIndex "then" ("if":rest))
-        elseValue = getValue (elemIndex "else" ("if":rest))
-        afterValues = drop elseValue ("if":rest)
-        cond = parseAnd (isPar (drop 1 (take (thenValue - 1) ("if":rest))))
-        thenCase = parsing (drop thenValue (take (elseValue - 1) ("if":rest))) []
-        elseCase =
-            case firstElemTake afterValues of
-                "(" -> parsing (drop (getValue (elemIndex ")" afterValues)) afterValues) []
-                ";" -> parsing (drop (getValue (elemIndex ";" afterValues)) afterValues) []
-                _   -> parsing afterValues [] 
-    in parsing (drop (getValue (elemIndex ")" afterValues)) afterValues) (statm ++ [IfThenElse (getValueBexp cond) thenCase elseCase])
+  let thenValue = getValue (elemIndex "then" ("if":rest))
+      elseValue = getValue (elemIndex "else" ("if":rest))
+      afterValues = drop elseValue ("if":rest)
+  in case firstElemTake afterValues of
+       "(" -> parsing (drop (getValue (elemIndex ")" afterValues)) afterValues) (statm ++ [IfThenElse (getValueBexp (parseAnd (isPar (drop 1 (take (thenValue - 1) ("if":rest)))))) (parsing (drop thenValue (take (elseValue - 1) ("if":rest))) []) (parsing (take (getValue (elemIndex ")" afterValues)) afterValues) [] )])
+       _   -> parsing (drop (getValue (elemIndex ";" afterValues)) afterValues) (statm ++ [IfThenElse (getValueBexp (parseAnd (isPar (drop 1 (take (thenValue - 1) ("if":rest)))))) (parsing (drop thenValue (take (elseValue - 1) ("if":rest))) []) (parsing (take (getValue (elemIndex ";" afterValues)) afterValues) [])])
 
 parsing ("while":rest) stm =
   let doElem = getValue $ elemIndex "do" ("while":rest)
@@ -153,6 +148,7 @@ parsing ("while":rest) stm =
 firstElemTake :: [String] -> String
 firstElemTake [] = error"throw take first element"
 firstElemTake ("(":_) = "("
+firstElemTake (";":_) = ";"
 firstElemTake (a:_) = a
 -- verified
 
